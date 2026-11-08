@@ -1,0 +1,24 @@
+/* The only place raw color values live. Redefine these under [data-theme="dark"] to add dark mode. */
+:root {
+  --color-primary: #7258e8;
+  --color-primary-strong: #4935a8;
+  --color-lavender: #f1edff;
+  --color-ink: #202338;
+  --color-ink-soft: #5b5f78;
+  --color-canvas: #fafafd;
+  --color-surface: #ffffff;
+  --color-muted: #f3f4f8;
+  --color-line: #e5e6ee;
+  --color-success: #198765;
+  --color-success-soft: #e3f4ee;
+  --color-warning: #e7a447;
+  --color-warning-soft: #fdf3e2;
+  --color-warning-ink: #7a4d0b;
+  --color-danger: #d95362;
+  --color-danger-strong: #b5303f;
+  --color-danger-soft: #fcebed;
+  --color-chat-bg: #efeae2;
+  --color-chat-out: #d9fdd3;
+  --color-chat-bar: #0b5c4e;
+  --color-overlay: rgb(32 35 56 / 0.4);
+}

@@ -1,0 +1,26 @@
+# Blueprint for later use. Applying it creates a Render service and requires founder approval.
+services:
+  - type: web
+    name: gatherai-api
+    runtime: python
+    plan: free
+    rootDir: services/api
+    buildCommand: pip install .
+    preDeployCommand: alembic upgrade head
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT --proxy-headers
+    healthCheckPath: /api/health
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: AUTH_MODE
+        value: supabase
+      - key: ANTHROPIC_MODEL
+        value: claude-opus-5-5
+      - key: DATABASE_URL
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: CORS_ALLOWED_ORIGINS
+        sync: false

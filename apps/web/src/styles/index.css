@@ -1,0 +1,36 @@
+@import "tailwindcss";
+@import "./tokens.css";
+
+@theme inline {
+  --color-primary: var(--color-primary);
+  --color-primary-strong: var(--color-primary-strong);
+  --color-lavender: var(--color-lavender);
+  --color-ink: var(--color-ink);
+  --color-ink-soft: var(--color-ink-soft);
+  --color-canvas: var(--color-canvas);
+  --color-surface: var(--color-surface);
+  --color-muted: var(--color-muted);
+  --color-line: var(--color-line);
+  --color-success: var(--color-success);
+  --color-success-soft: var(--color-success-soft);
+  --color-warning: var(--color-warning);
+  --color-warning-soft: var(--color-warning-soft);
+  --color-warning-ink: var(--color-warning-ink);
+  --color-danger: var(--color-danger);
+  --color-danger-strong: var(--color-danger-strong);
+  --color-danger-soft: var(--color-danger-soft);
+  --color-chat-bg: var(--color-chat-bg);
+  --color-chat-out: var(--color-chat-out);
+  --color-chat-bar: var(--color-chat-bar);
+  --color-overlay: var(--color-overlay);
+  --font-sans: Inter, Heebo, ui-sans-serif, system-ui, sans-serif;
+}
+
+html { -webkit-text-size-adjust: 100%; }
+body { background: var(--color-canvas); color: var(--color-ink); font-family: var(--font-sans); -webkit-font-smoothing: antialiased; }
+[dir="rtl"] body { font-family: Heebo, Inter, ui-sans-serif, sans-serif; }
+:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
