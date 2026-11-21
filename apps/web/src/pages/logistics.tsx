@@ -178,7 +178,7 @@ export function Accommodations() {
                 {d.accommodations.length === 0 && <Card className="sm:col-span-2"><EmptyState title="No hosts yet" /></Card>}
                 {d.accommodations.map((a) => (
                   <ResourceCard key={a.id} title={a.host_name} status={a.status}>
-                    <p className="mt-1 text-sm text-ink-soft">{a.location || "Location not set"}</p>
+                    <p className="mt-1 text-sm text-ink-soft">{a.location === null ? "Address visible to logistics managers only" : a.location || "Location not set"}</p>
                     <p className="mt-2 text-sm font-medium">{a.beds_remaining} of {a.capacity} beds open</p>
                     {a.restrictions && <p className="mt-1 text-xs text-ink-soft">{a.restrictions}</p>}
                     {a.host_contact && <p className="mt-1 text-xs text-ink-soft">Contact: {a.host_contact}</p>}

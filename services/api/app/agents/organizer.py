@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 from app.auth.access import EventAccess
 from app.core.config import get_settings
 from app.models.models import AIConversation, AIMessage, Participant, Vehicle
-from app.services.common import track
+from app.services.common import ai_budget_available, track
 from app.services.planning import build_plan
 from app.services.validation import RIDE, STAY
 from app.tools.registry import ToolContext, anthropic_tool_definitions, execute_tool
@@ -154,6 +154,8 @@ def _rule_based(ctx: ToolContext, message: str) -> AssistantResult:
             "participant_ids": [p["id"] for p in pending],
             "content": f"Hi! A reminder that your registration for {name} is not confirmed yet. Please reply if you still plan to join.",
         })
+        if "error" in result:
+            return done(f"I could not draft reminders: {result['error']}")
         return done(f"Saved {result['drafted']} reminder drafts in Messages. They have not been sent.")
     metrics_data = _run_tool(ctx, calls, "get_event_summary", {})
     metrics, alerts = metrics_data["metrics"], metrics_data["alerts"]
@@ -184,6 +186,12 @@ def respond(db: Session, access: EventAccess, conversation: AIConversation, mess
 
     if not settings.ai_live:
         return _rule_based(ctx, message)
+    if not ai_budget_available(db, access.event.organization_id):
+        return AssistantResult(
+            "Your organization has reached its daily AI usage limit. Please try again later. No changes were made.",
+            "unavailable", [], ctx.proposals,
+        )
+    track(db, "ai_live_call", access.event.id)
     try:
         return _live(ctx, history)
     except anthropic.AuthenticationError:

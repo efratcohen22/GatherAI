@@ -14,7 +14,7 @@ from sqlalchemy.orm import Session
 
 from app.core.config import get_settings
 from app.models.models import AIConversation, AIMessage, Event, EventMessage, Participant, RegistrationRequest
-from app.services.common import audit, track
+from app.services.common import ai_budget_available, audit, track
 from app.services.participants import cancel_participant, initial_status
 
 log = logging.getLogger(__name__)
@@ -62,10 +62,11 @@ def keyword_extract(message: str) -> Extraction:
     return data
 
 
-def extract(message: str) -> Extraction:
+def extract(db: Session, event: Event, message: str) -> Extraction:
     settings = get_settings()
-    if not settings.ai_live:
+    if not settings.ai_live or not ai_budget_available(db, event.organization_id):
         return keyword_extract(message)
+    track(db, "ai_live_call", event.id)
     try:
         client = anthropic.Anthropic(api_key=settings.anthropic_api_key, timeout=20, max_retries=1)
         response = client.messages.parse(
@@ -200,7 +201,7 @@ def _handle(db: Session, event: Event, convo: AIConversation, message: str, got:
 
 
 def handle_message(db: Session, event: Event, convo: AIConversation, message: str) -> str:
-    reply = _handle(db, event, convo, message, extract(message))
+    reply = _handle(db, event, convo, message, extract(db, event, message))
     db.add(AIMessage(conversation_id=convo.id, role="user", content=message))
     db.add(AIMessage(conversation_id=convo.id, role="assistant", content=reply))
     if convo.participant_id:

@@ -133,3 +133,10 @@ def test_message_send_once_and_simulated(owner):
 def test_csv_neutralizes_formulas():
     assert _csv_safe("=HYPERLINK(1)") == "'=HYPERLINK(1)"
     assert _csv_safe("Avi") == "Avi"
+
+
+def test_request_id_is_returned_and_sanitized(client):
+    generated = client.get("/api/health").headers["X-Request-ID"]
+    assert len(generated) == 32
+    assert client.get("/api/health", headers={"X-Request-ID": "trace-12345678"}).headers["X-Request-ID"] == "trace-12345678"
+    assert client.get("/api/health", headers={"X-Request-ID": "bad id\r\nx"}).headers["X-Request-ID"] != "bad id\r\nx"

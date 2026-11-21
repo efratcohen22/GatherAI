@@ -169,7 +169,7 @@ def _accommodation_out(a: Accommodation, guests: list[PersonRef], access: EventA
     out.guests = guests
     out.beds_remaining = max(a.capacity - len(guests), 0) if a.status == "active" else 0
     if not access.can("manage_logistics"):
-        out.host_contact = None
+        out.host_contact = out.location = out.restrictions = None
     return out
 
 

@@ -29,7 +29,7 @@ export interface Vehicle {
 }
 export interface Transportation { vehicles: Vehicle[]; unassigned: Waiting[]; total_open_seats: number; shortage: number }
 export interface Accommodation {
-  id: string; host_name: string; host_contact: string | null; location: string; capacity: number;
+  id: string; host_name: string; host_contact: string | null; location: string | null; capacity: number;
   restrictions: string | null; status: string; beds_remaining: number; guests: PersonRef[];
 }
 export interface Accommodations { accommodations: Accommodation[]; unassigned: Waiting[]; total_open_beds: number; shortage: number }

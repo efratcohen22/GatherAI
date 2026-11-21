@@ -12,7 +12,7 @@ from app.auth.service import CurrentUser
 from app.core.rate_limit import rate_limit
 from app.db.session import get_db
 from app.messaging.providers import get_provider
-from app.models.models import AIActionProposal, AIConversation, AIMessage, Event, EventMessage, EventTask, Participant
+from app.models.models import AIActionProposal, AIConversation, AIMessage, Event, EventMessage, EventTask, Participant, User
 from app.schemas.schemas import (
     ChatIn,
     ChatOut,
@@ -51,11 +51,15 @@ def _task(db: Session, event_id: uuid.UUID, task_id: uuid.UUID) -> EventTask:
     return task
 
 
-def _check_task_links(db: Session, event_id: uuid.UUID, participant_id: uuid.UUID | None) -> None:
+def _check_task_links(db: Session, event_id: uuid.UUID, participant_id: uuid.UUID | None, assigned_to: uuid.UUID | None = None) -> None:
     if participant_id and not db.scalar(
         select(Participant.id).where(Participant.id == participant_id, Participant.event_id == event_id)
     ):
         raise HTTPException(422, "Participant is not part of this event")
+    if assigned_to:
+        assignee = db.get(User, assigned_to)
+        if assignee is None or resolve_access(db, assignee, event_id) is None:
+            raise HTTPException(422, "Tasks can only be assigned to members of this event's team")
 
 
 @router.get("/tasks", response_model=list[TaskOut])
@@ -73,7 +77,7 @@ def list_tasks(
 
 @router.post("/tasks", response_model=TaskOut, status_code=201)
 def create_task(body: TaskCreate, access: TaskManager, db: Db) -> EventTask:
-    _check_task_links(db, access.event.id, body.participant_id)
+    _check_task_links(db, access.event.id, body.participant_id, body.assigned_to)
     task = EventTask(event_id=access.event.id, **body.model_dump())
     db.add(task)
     db.flush()
@@ -86,7 +90,7 @@ def create_task(body: TaskCreate, access: TaskManager, db: Db) -> EventTask:
 def update_task(task_id: uuid.UUID, body: TaskUpdate, access: TaskManager, db: Db) -> EventTask:
     task = _task(db, access.event.id, task_id)
     changes = body.model_dump(exclude_unset=True)
-    _check_task_links(db, access.event.id, changes.get("participant_id"))
+    _check_task_links(db, access.event.id, changes.get("participant_id"), changes.get("assigned_to"))
     for key, value in changes.items():
         setattr(task, key, value)
     audit(db, access.event, access.user.id, "task.updated", "task", task.id, {"fields": sorted(changes)})
@@ -228,7 +232,8 @@ def reject_proposal(proposal_id: uuid.UUID, access: Approver, db: Db) -> AIActio
 # Simulator
 def _sim_access(db: Session, user, event_id: uuid.UUID) -> Event:
     access = resolve_access(db, user, event_id)
-    if access is None or not access.can("manage_messages"):
+    # The simulator can register, cancel and change participants, so it needs that permission.
+    if access is None or not (access.can("manage_messages") and access.can("manage_participants")):
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Event not found")
     return access.event
 

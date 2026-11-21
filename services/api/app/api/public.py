@@ -106,7 +106,12 @@ def update_registration(token: str, body: ManagedRegistrationUpdate, db: Db) -> 
     person, event = _by_token(db, token)
     if person.registration_status == "cancelled":
         raise HTTPException(status.HTTP_409_CONFLICT, "This registration was cancelled")
-    for key, value in body.model_dump(exclude_unset=True).items():
+    changes = body.model_dump(exclude_unset=True)
+    if not event.transportation_enabled:
+        changes.pop("transportation_required", None)
+    if not event.accommodation_enabled:
+        changes.pop("accommodation_required", None)
+    for key, value in changes.items():
         setattr(person, key, value)
     audit(db, event, None, "participant.self_updated", "participant", person.id)
     db.commit()

@@ -28,3 +28,12 @@ A participant has at most one active ride per event, enforced by a partial uniqu
 
 ## D9: Structured restriction tags
 Participants carry `tags`; vehicles and accommodations carry `excluded_tags`. Compatibility is deterministic and contains no religious or event-specific assumptions. Free-text restrictions remain informational.
+
+## D10: Success green darkened to #147356
+The suggested #198765 measured 4.47:1 on white and 3.93:1 on the soft green badge, below WCAG AA for small text. The axe audit flagged it. #147356 measures 5.81:1 and 5.1:1 and keeps the same hue.
+
+## D11: Production is the default environment
+`APP_ENV` defaults to `production`, so a deployment that forgets the variable cannot fall into development auth. Local auth requires `APP_ENV=development` or `test` and a `LOCAL_JWT_SECRET` of at least 32 characters, which `scripts/setup.ps1` generates into the gitignored `.env`. The chat simulator router is not mounted in production.
+
+## D12: Daily live AI budget per organization
+`AI_DAILY_REQUEST_LIMIT` (default 300) caps live model calls per organization in a rolling 24 hours, counting both organizer chat and participant extraction. Past the cap, the organizer assistant answers that the limit is reached and participant chat falls back to keyword extraction. This bounds API cost before real usage data exists.

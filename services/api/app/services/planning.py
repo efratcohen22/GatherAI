@@ -48,7 +48,8 @@ def resource_label(kind: Kind, resource: object, names: dict) -> str:
     if kind is RIDE:
         driver = names.get(resource.driver_participant_id, "Unassigned driver")
         return f"{driver} from {resource.departure_location or 'unspecified location'}"
-    return f"{resource.host_name} ({resource.location or 'unspecified location'})"
+    # Proposal payloads are visible to view-only members, so no private address here.
+    return resource.host_name
 
 
 def build_plan(db: Session, kind: Kind, event_id: uuid.UUID, release_resource_id: uuid.UUID | None = None) -> Plan:

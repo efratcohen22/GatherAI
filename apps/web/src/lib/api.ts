@@ -1,7 +1,7 @@
 const BASE = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000";
 
 export class ApiError extends Error {
-  constructor(public status: number, message: string) {
+  constructor(public status: number, message: string, public requestId?: string) {
     super(message);
   }
 }
@@ -34,10 +34,10 @@ async function raw(path: string, init: RequestInit = {}): Promise<Response> {
     if (response.status === 401 && token) onUnauthorized();
     const body = await response.json().catch(() => null);
     const detail = body?.detail;
-    throw new ApiError(
-      response.status,
-      typeof detail === "string" ? detail : Array.isArray(detail) ? "Please check the highlighted information." : "Something went wrong.",
-    );
+    const requestId = response.headers.get("X-Request-ID") ?? undefined;
+    let message = typeof detail === "string" ? detail : Array.isArray(detail) ? "Please check the highlighted information." : "Something went wrong.";
+    if (response.status >= 500 && requestId) message += ` (Reference: ${requestId.slice(0, 8)})`;
+    throw new ApiError(response.status, message, requestId);
   }
   return response;
 }

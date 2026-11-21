@@ -9,7 +9,7 @@
   --color-surface: #ffffff;
   --color-muted: #f3f4f8;
   --color-line: #e5e6ee;
-  --color-success: #198765;
+  --color-success: #147356; /* darkened from #198765 for WCAG AA text contrast (D10) */
   --color-success-soft: #e3f4ee;
   --color-warning: #e7a447;
   --color-warning-soft: #fdf3e2;

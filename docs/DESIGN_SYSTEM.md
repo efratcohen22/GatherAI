@@ -11,7 +11,7 @@ Calm, organized, warm. Tokens live in `apps/web/src/styles/tokens.css` and map t
 | canvas | #FAFAFD |
 | surface | #FFFFFF |
 | muted | #F3F4F8 |
-| success | #198765 |
+| success | #147356 (darkened from #198765 to meet AA on white and soft green, D10) |
 | warning | #E7A447 (fill only; pair with dark text) |
 | danger | #D95362 |
 

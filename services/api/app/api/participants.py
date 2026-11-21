@@ -47,13 +47,15 @@ def _check_capacity(db: Session, event: Event) -> None:
         raise HTTPException(status.HTTP_409_CONFLICT, "The event is at capacity")
 
 
-def _filtered(event_id: uuid.UUID, search: str | None, reg_status: str | None):
+def _filtered(event_id: uuid.UUID, search: str | None, reg_status: str | None, include_email: bool = False):
     query = select(Participant).where(Participant.event_id == event_id)
     if reg_status:
         query = query.where(Participant.registration_status == reg_status)
     if search:
         pattern = f"%{search.lower()}%"
-        query = query.where(or_(func.lower(Participant.name).like(pattern), func.lower(Participant.email).like(pattern)))
+        name_match = func.lower(Participant.name).like(pattern)
+        # Matching on a masked field would leak it one character at a time.
+        query = query.where(or_(name_match, func.lower(Participant.email).like(pattern)) if include_email else name_match)
     return query
 
 
@@ -64,7 +66,7 @@ def list_participants(
     needs: str | None = Query(default=None, pattern="^(ride|stay)$"),
     page: int = Query(default=1, ge=1), page_size: int = Query(default=50, ge=1, le=200),
 ) -> ParticipantPage:
-    query = _filtered(access.event.id, search, status_filter)
+    query = _filtered(access.event.id, search, status_filter, access.can("manage_participants"))
     rides, stays, requests = logistics_maps(db, access.event.id)
     if needs == "ride":
         query = query.where(Participant.transportation_required.is_(True), Participant.id.not_in(rides or [uuid.uuid4()]))
@@ -80,7 +82,7 @@ def list_participants(
 def _csv_safe(value: object) -> str:
     """Neutralize spreadsheet formula injection in participant-supplied text."""
     text = "" if value is None else str(value)
-    return f"'{text}" if text[:1] in ("=", "+", "-", "@", "\t", "\r") else text
+    return f"'{text}" if text.lstrip()[:1] in ("=", "+", "-", "@", "|", "%") or text[:1] in ("\t", "\r") else text
 
 
 @router.get("/export.csv")

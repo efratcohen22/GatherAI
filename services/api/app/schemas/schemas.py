@@ -355,7 +355,7 @@ class AccommodationOut(ORM):
     id: uuid.UUID
     host_name: str
     host_contact: str | None
-    location: str
+    location: str | None
     capacity: int
     restrictions: str | None
     status: str

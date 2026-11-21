@@ -99,3 +99,18 @@ def test_ai_outage_is_reported_safely(owner, monkeypatch):
     use_client(monkeypatch, Down([]))
     result = ask(owner, eid, "x")
     assert result["mode"] == "unavailable" and "No changes were made" in result["reply"]
+
+
+def test_daily_ai_budget_stops_live_calls(owner, monkeypatch):
+    from app.services import common
+
+    settings = Settings(anthropic_api_key="test", app_env="test", ai_daily_request_limit=1)
+    fake = FakeAnthropic([Block(stop_reason="end_turn", content=[Block(type="text", text="Hello")])])
+    use_client(monkeypatch, fake)
+    monkeypatch.setattr(organizer, "get_settings", lambda: settings)
+    monkeypatch.setattr(common, "get_settings", lambda: settings)
+    eid = owner.event()["id"]
+    assert ask(owner, eid, "Hi")["mode"] == "live"
+    second = ask(owner, eid, "Hi again")
+    assert second["mode"] == "unavailable" and "daily AI usage limit" in second["reply"]
+    assert len(fake.calls) == 1

@@ -10,6 +10,6 @@ Nothing is deployed. Each step below needs founder authorization.
 | 4 | Render | Approve the `render.yaml` blueprint; set secret variables in the dashboard |
 | 5 | Vercel | Import `apps/web`; set `VITE_API_BASE_URL`, `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` |
 
-The API refuses to start with `AUTH_MODE=local` outside development. `/api/health` is the health check. Migrations run through `alembic upgrade head`.
+The API refuses to start with `AUTH_MODE=local` outside development, and `APP_ENV` defaults to production. In Supabase Auth, enable "Confirm email" before inviting co-organizers (SECURITY.md). Optional: `AI_DAILY_REQUEST_LIMIT` caps live AI calls per organization per day (default 300). `/api/health` is the health check. Migrations run through `alembic upgrade head`.
 
 The PostgreSQL path has not been executed yet: migrations, RLS and row locks have only run against SQLite, where RLS is skipped. Run them against a Supabase development project first.

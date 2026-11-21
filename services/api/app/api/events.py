@@ -147,6 +147,8 @@ def remove_event_member(user_id: uuid.UUID, access: Annotated[EventAccess, Depen
     member = db.get(EventMember, (access.event.id, user_id))
     if member is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Member not found")
+    if not set(member.permissions) & ALL_PERMISSIONS <= access.permissions:
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "You cannot remove a member with permissions you do not hold")
     db.delete(member)
     audit(db, access.event, access.user.id, "event.member_removed", "user", user_id)
     db.commit()
