@@ -16,3 +16,33 @@ test-results/
 *.db-journal
 .DS_Store
 .vercel/
+
+# Local databases (SQLite and its journals)
+*.sqlite
+*.sqlite3
+*.db-wal
+*.db-shm
+
+# Keys, certificates and credentials
+*.pem
+*.key
+*.p12
+*.pfx
+credentials*.json
+service-account*.json
+
+# Logs and tool caches
+*.log
+npm-debug.log*
+.mypy_cache/
+htmlcov/
+.coverage
+*.tsbuildinfo
+.supabase/
+supabase/.temp/
+
+# Editor and per-user Claude Code settings
+.idea/
+.vscode/
+.claude/settings.local.json
+Thumbs.db
