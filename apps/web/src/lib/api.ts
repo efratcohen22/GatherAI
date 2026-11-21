@@ -28,7 +28,10 @@ async function raw(path: string, init: RequestInit = {}): Promise<Response> {
       },
     });
   } catch {
-    throw new ApiError(0, "We couldn't reach the server. Check your connection and try again.");
+    // In development the usual cause is a stopped API process, not the network.
+    throw new ApiError(0, import.meta.env.DEV
+      ? `The GatherAI API is not responding at ${BASE}. Start it with ./scripts/dev.ps1 and try again.`
+      : "We couldn't reach the server. Check your connection and try again.");
   }
   if (!response.ok) {
     if (response.status === 401 && token) onUnauthorized();

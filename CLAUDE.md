@@ -13,6 +13,7 @@ The founder writes no code. Report progress to the founder in Hebrew; code, comm
 
 ## Commands (from the repo root, Windows PowerShell)
 - `./scripts/setup.ps1`: install everything, migrate, load demo data
+- `./scripts/dev.ps1`: start API and web together in their own windows (skips any already running)
 - `./scripts/dev-api.ps1`: API at http://localhost:8000 (docs at `/docs`)
 - `./scripts/dev-web.ps1`: web at http://localhost:5173
 - `./scripts/test.ps1`: backend and frontend tests
